@@ -1,7 +1,7 @@
 const playboard=document.querySelector(".play-board");
 const scoreElement=document.querySelector(".score");
 const highScoreElement=document.querySelector(".high-score");
-const controls=document.querySelector(".controls i");
+const controls=document.querySelectorAll(".controls i");
 
 let gameOver=false;
 let foodX,foodY;
@@ -9,7 +9,7 @@ let snakeX=5,snakeY=5;
 let velocityX=0,velocityY=0;
 let snakeBody=[];
 let id;
-let score;
+let score=0;
 
 // Getting highest score from local storage;
 
@@ -30,6 +30,7 @@ const handleGameOver=()=>{
 // Simple Direction Logic => if velocityY=1 means it is Negative of Y axis and vice-versa
 
 const changeDirection=(e)=>{
+    console.log(e)
     if(e.key=="ArrowUp"&&velocityY!=1){
         velocityX=0;
         velocityY=-1;
@@ -45,7 +46,12 @@ const changeDirection=(e)=>{
     }
 }
 
+// controls.forEach((el)=>{
+//     console.log(el)
+// })
+
 controls.forEach((button)=>button.addEventListener("click",()=>{
+    console.log({key:button.dataset.key});
     changeDirection({key:button.dataset.key});
 }))
 
@@ -60,7 +66,7 @@ const initGame=()=>{
         updateFoodPosition();
         snakeBody.push([foodX,foodY]);
         score++;
-        highScore=score >= highScore ? score:highScore;
+        highScore= score >= highScore ? score:highScore;
 
         localStorage.setItem("high-score",JSON.stringify(highScore));
         scoreElement.innerText=`Score: ${score}`;
@@ -76,9 +82,26 @@ const initGame=()=>{
     }
     snakeBody[0]=[snakeX,snakeY];
 
+    // Check if snake is out of bound of wall    
+
     if(snakeX<=0||snakeX>30||snakeY<=0||snakeY>30){
         return gameOver=true;
     }
 
+    // Add div for each part of snake body
+
+    for(let i=0;i<snakeBody.length;i++){
+        html+=`<div class="head" style="grid-area:${snakeBody[i][1]}/ ${snakeBody[i][0]}"></div>`;
+        if(i!=0&&snakeBody[0][1]==snakeBody[i][1] && snakeBody[0][0]==snakeBody[i][0]){
+            gameOver=true;
+        }
+    }
+    playboard.innerHTML=html;
+
 }
+
+updateFoodPosition();
+id=setInterval(initGame,100);
+
+document.addEventListener("keyup",changeDirection);
 
